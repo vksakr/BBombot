@@ -24,8 +24,6 @@ app = Flask(__name__)
 # slack = Slacker('xoxp-506274278966-504714157377-506748857248-7a4d53319e9f9bf72899913f121ae80c')
 
 
-infolist = []
-out_list = []
 outfix=[]
 wordlist = ['기타','컴퓨터','디지털','먹을거리','서적','가전','육아','카메라','의류/잡화','화장품','등산/캠핑','핫딜','최신']
 
@@ -124,7 +122,6 @@ def crowling(text):
                 "title": tmp['title'],
                 'title_link' : tmp['link'],
             }
-            # infolist.append(tmp)
             outfix.append(outrow)
         elif put=='최신':
             outrow = {
@@ -132,13 +129,12 @@ def crowling(text):
                 'title_link' : tmp['link'],
                 "text": tmp['sort'],
             }
-            # infolist.append(tmp)
             outfix.append(outrow)
 
 
     return 0
 
-
+#인기글 크롤러
 def hotClick() :
     url = "http://www.ppomppu.co.kr/hot.php?id=ppomppu"
 
@@ -152,33 +148,24 @@ def hotClick() :
         tit = tr_text.find_all("a")[1].get_text()
         li = tr_text.find_all("a")[1]['href']
         tmp['title'] = tit
-        # print(li)
         tmp['link'] = 'http://www.ppomppu.co.kr'+li
         outrow = {
                 "title": tmp['title'],
                 'title_link' : tmp['link'],
             }
-            # infolist.append(tmp)
         outfix.append(outrow)
 
 
 
 def _out_price(text):
-    # slack.chat.post_message('#chatbot-challenge','다음 키워드로 호출해주세요: 최신 핫딜 기타 컴퓨터 디지털 먹을거리 서적 가전 육아 카메라 의류/잡화 화장품 등산/캠핑')
-    # stext = text.split(' ')[1]
-    # if stext in wordlist:
     if(text == '핫딜'):
         hotClick()
-        # slack.chat.post_message('#chatbot-challenge', attachments=outfix)
         if(outfix == []):
-        # slack.chat.post_message('#chatbot-challenge', '아쉽지만 찾는 정보가 없습니다!')
             return 0
         return outfix
     else:
         crowling(text)
-        # slack.chat.post_message('#chatbot-challenge', attachments=outfix)
         if(outfix == []):
-        # slack.chat.post_message('#chatbot-challenge', '아쉽지만 찾는 정보가 없습니다!')
             return 0
         return outfix
     
@@ -213,8 +200,6 @@ def _event_handler(event_type, slack_event):
                 "ts": 123456789
             }
         ]
-        # stext = text.split(' ')[1]
-        # slack.chat.post_message('#chatbot-challenge',attachments=put_msg)
         if text[-1:] == '>' :
             sc.api_call(
                 "chat.postMessage",
