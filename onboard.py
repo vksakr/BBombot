@@ -16,12 +16,12 @@ from datetime import datetime,timedelta
 app = Flask(__name__)
 
 #슬랙 api 키
-slack_token = "xoxb-506274278966-507485676402-HyDab3qbYLbzDrI7qgVOGyUa"
-slack_client_id = "506274278966.507684340901"
-slack_client_secret = "92f9b34c479a79874eaf239822f505bf"
-slack_verification = "iYx1Pxkdm3uebtqXWEUVwevM"
-sc = SlackClient(slack_token)
-slack = Slacker('xoxb-506274278966-507485676402-HyDab3qbYLbzDrI7qgVOGyUa')
+# slack_token = "xoxp-506274278966-504714157377-506748857248-7a4d53319e9f9bf72899913f121ae80c"
+# slack_client_id = "506274278966.507684340901"
+# slack_client_secret = "92f9b34c479a79874eaf239822f505bf"
+# slack_verification = "iYx1Pxkdm3uebtqXWEUVwevM"
+# sc = SlackClient(slack_token)
+# slack = Slacker('xoxp-506274278966-504714157377-506748857248-7a4d53319e9f9bf72899913f121ae80c')
 
 
 infolist = []
@@ -169,12 +169,19 @@ def _out_price(text):
     # if stext in wordlist:
     if(text == '핫딜'):
         hotClick()
-        slack.chat.post_message('#chatbot-challenge', attachments=outfix)
+        # slack.chat.post_message('#chatbot-challenge', attachments=outfix)
+        if(outfix == []):
+        # slack.chat.post_message('#chatbot-challenge', '아쉽지만 찾는 정보가 없습니다!')
+            return 0
+        return outfix
     else:
         crowling(text)
-        slack.chat.post_message('#chatbot-challenge', attachments=outfix)
-    if(outfix == []):
-        slack.chat.post_message('#chatbot-challenge', '아쉽지만 찾는 정보가 없습니다!')
+        # slack.chat.post_message('#chatbot-challenge', attachments=outfix)
+        if(outfix == []):
+        # slack.chat.post_message('#chatbot-challenge', '아쉽지만 찾는 정보가 없습니다!')
+            return 0
+        return outfix
+    
     return None
 
     
@@ -206,16 +213,33 @@ def _event_handler(event_type, slack_event):
                 "ts": 123456789
             }
         ]
-        slack.chat.post_message('#chatbot-challenge',attachments=put_msg)
-        stext = text.split(' ')[1]
-        if stext in wordlist:
-            _out_price(stext)
-        # keywords = _out_price(text)
-        # sc.api_call(
-        #     "chat.postMessage",
-        #     channel=channel,
-        #     # text=keywords
-        # )
+        # stext = text.split(' ')[1]
+        # slack.chat.post_message('#chatbot-challenge',attachments=put_msg)
+        if text[-1:] == '>' :
+            sc.api_call(
+                "chat.postMessage",
+                channel=channel,
+                attachments=put_msg
+            )
+            return make_response("App mention message has been sent", 200,)
+        else :
+            stext = text.split(' ')[1]
+            if stext in wordlist:
+                # _out_price(stext)
+                keywords = _out_price(stext)
+                if keywords == 0:
+                    sc.api_call(
+                    "chat.postMessage",
+                    channel=channel,
+                    text='죄송합니다 찾는 정보가 없습니다 ㅜㅜ'
+                )
+                sc.api_call(
+                    "chat.postMessage",
+                    channel=channel,
+                    attachments=keywords
+                )
+                return make_response("App mention message has been sent", 200,)
+
 
         return make_response("App mention message has been sent", 200,)
 
